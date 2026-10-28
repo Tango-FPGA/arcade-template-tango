@@ -1,0 +1,20 @@
+# sim output
+sim/obj_arc/
+sim/obj_video_pattern/
+sim/obj_rotate_pattern/
+sim/obj_pad_row/
+sim/obj_pad_row_mutant/
+sim/obj_*.log
+# Gowin output
+build/out/
+build/out_draw*/
+build/*_gate.txt
+build/*.log
+*.fs
+*.bin
+__pycache__/
+build/.last_heavy_end
+# sim/streams/empty.bin is a real, tiny (0-byte) sim fixture run_tb_arc.sh needs, not a build output
+!sim/streams/empty.bin
+# bitstream archive (Gowin output copies)
+bitstreams/

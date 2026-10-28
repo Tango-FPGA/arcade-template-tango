@@ -1,0 +1,45 @@
+<misterromdescription>
+	<name>Arcade Template Test</name>
+	<region></region>
+	<homebrew>yes</homebrew>
+	<bootleg>no</bootleg>
+	<year>2026</year>
+	<manufacturer>Tango</manufacturer>
+	<category>Test</category>
+	<setname>arcadetemplate</setname>
+	<!-- The Arcade Template's test .mra (synthetic: no game ROM data).
+	     <rbf>arcadetemplate</rbf> resolves, in the firmware, to
+	     _Arcade/cores/Arcade-arcadetemplate_<YYYYMMDD>.bin (or arcadetemplate_<date>.bin); the
+	     lexicographically greatest matching name wins, as MiSTer's mra_loader.cpp.
+	     <rom index="0">: 16 inline bytes, ASCII "TANGO-A5-ROM-OK!", downloaded at index 0 so the core's
+	     picture can show that the ROM arrived.
+	     <switches>: 8 one-bit switches on DIP-word bits 0..7, so each OSD toggle flips exactly one bit
+	     of the index-254 word (tango_core_arcade_template.v DIP_IDX) and one bar of the picture.
+	     default="C5" -> bits 0,2,6,7 on at first launch. Not a palindrome (0xA5 = 10100101 reads the same
+	     both ways and would hide a bit-order or mirror mistake): the picture draws bit cells LSB-left, so C5 shows
+	     as on,off,on,off,off,off,on,on from left to right.
+	     <nvram index="4" size="8"/>: the core's NVRAM_IDX and its 8-byte nvram_reg; the core adds 1 on
+	     every NVRAM download close, so the saved value visibly increments once per launch. -->
+	<rbf>arcadetemplate</rbf>
+	<rom index="0">
+		<part>54 41 4E 47 4F 2D 41 35 2D 52 4F 4D 2D 4F 4B 21</part>
+	</rom>
+	<switches default="C5">
+		<dip bits="0" ids="Off,On" name="Bit 0"></dip>
+		<dip bits="1" ids="Off,On" name="Bit 1"></dip>
+		<dip bits="2" ids="Off,On" name="Bit 2"></dip>
+		<dip bits="3" ids="Off,On" name="Bit 3"></dip>
+		<dip bits="4" ids="Off,On" name="Bit 4"></dip>
+		<dip bits="5" ids="Off,On" name="Bit 5"></dip>
+		<dip bits="6" ids="Off,On" name="Bit 6"></dip>
+		<dip bits="7" ids="Off,On" name="Bit 7"></dip>
+	</switches>
+	<nvram index="4" size="8"/>
+	<!-- MiSTer's per-game button override (Main_MiSTer set_ovr_buttons; real example: Galaxian's
+	     <buttons default="A,Start,Select,R,B,L" names="Fire,Start 1P,Start 2P,Coin,Test,Pause">). names = the
+	     core's own CONF_STR "J1,Button 1,Button 2,Start,Coin;" (joystick bits 4..7); default = the map the
+	     firmware already guesses from those names (Button 1 -> A, Button 2 -> B, Start -> Start, Coin -> R). The
+	     firmware parses this tag but does not apply it yet, so it changes nothing today and nothing when it
+	     is wired up. -->
+	<buttons names="Button 1,Button 2,Start,Coin" default="A,B,Start,R"/>
+</misterromdescription>

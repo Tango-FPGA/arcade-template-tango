@@ -1,0 +1,54 @@
+arcade-template-tango -- licences and third-party material
+==========================================================
+
+Everything in this repository is the Tango authors' work under the MIT licence in LICENSE, Copyright (c) 2026 the
+Tango authors, as the source files' SPDX headers say, with the MiSTer text listed below.  sim/tb_menu.v,
+sim/tb_menu.cpp and sim/tb_ul.inc are adapted from menu-tango's simulation bench (the same authors, MIT).
+
+The framework at sys/ is a separate repository (sys-tango), included as a git submodule; its own LICENSE and NOTICE
+cover it.
+
+Bitstreams: the scaler build (build/build_arcade_template_ascal.sh: TANGO_VIDEO_ASCAL, DDR3, TANGO_VIDEO_PROC,
+rotation) includes sys-tango's tango_video_geo.v, tango_shmask.v and tango_audio_filter.v, which are under the GNU
+General Public License, version 2 or (at your option) any later version (derived from MiSTer; sys-tango's NOTICE).
+A bitstream from that build is therefore a combined work distributed under GPL-2.0-or-later; its source is this
+repository with sys-tango at sys/ (the commit the submodule points at).  The core's own code stays under MIT.
+PLL_INIT, and in DDR3 builds the DDR3 Memory Interface IP, which the build takes from the user's Gowin installation,
+keep Gowin's terms (sys-tango's NOTICE).
+
+
+MiSTer text in files that are otherwise MIT
+-------------------------------------------
+  - rtl/tango_core_arcade_template.v, both CONF_STR variants, and sim/tb_arc.inc (the CONF_STR the bench expects,
+    and a comment quoting it): the entries "T[0],Reset;" and "R[0],Reset and close OSD;", as in Template_MiSTer's
+    Template.sv (https://github.com/MiSTer-devel/Template_MiSTer; its header: GNU General Public License, version 2
+    or (at your option) any later version), the entries most MiSTer cores carry.
+  - rtl/tango_core_arcade_template.v, comments: quotes of two CONF_STR lines of Arcade-Galaga_MiSTer's
+    Arcade-Galaga.sv, "J1,Fire,Start 1P,Start 2P,Coin,Pause;" and "jn,A,Start,Select,R,L;"
+    (https://github.com/MiSTer-devel/Arcade-Galaga_MiSTer; the file's header: "Port to MiSTer", "Copyright (C) 2017
+    Sorgelig", GNU General Public License, version 2 or (at your option) any later version).
+  - fixtures/Arcade Template Test.mra, a comment: a quote of the <buttons> line of MiSTer's Galaxian .mra,
+    <buttons default="A,Start,Select,R,B,L" names="Fire,Start 1P,Start 2P,Coin,Test,Pause">, as an example of
+    MiSTer's per-game button override.
+  - sim/tb_menu.cpp (the CONF_STR the launcher core must return, in the bench's launcher session): the text of the
+    framework's Video page entries, "Aspect ratio,Original,Full Screen" and "Scale,Normal,V-Integer,
+    Narrower HV-Integer,Wider HV-Integer", which come from sys-tango (tango_video_opts.vh; sys-tango's NOTICE,
+    "MiSTer data in files that are otherwise MIT", names their sources in Template_MiSTer's Template.sv and the
+    MiSTer cores).  The core's scaler build carries the same entries through sys-tango.
+
+
+Following other projects' behaviour
+-----------------------------------
+These files are the Tango authors' code (MIT); they follow documented or observed behaviour of other projects,
+which they cite:
+  - The menu string format (CONF_STR, with its "DIP" and "J1" entries) and the core interface are MiSTer's
+    (sys-tango's NOTICE); the .mra format of fixtures/Arcade Template Test.mra is MiSTer's arcade ROM description.
+  - rtl/tango_core_arcade_template.v and sim/tb_pad_row.v: the joystick bit order and the button-name mapping of
+    Main_MiSTer (input.h, joymapping.cpp), as the comments cite them; the native 288 x 224 raster (384 x 264 total)
+    is Galaga's video timing as Arcade-Galaga_MiSTer's rtl/gen_video.vhd has it.
+  - sim/tb_menu.cpp and its *.inc sessions: the BL616 side of the link as the FPGA Companion firmware (Apache-2.0)
+    and the Tango firmware (firmware-tango, GPL-3.0-or-later) drive it.
+
+
+ROMs: none.  The .mra fixture's only ROM part is 16 bytes written inline in the file, the ASCII text
+"TANGO-A5-ROM-OK!"; sim/streams/empty.bin is an empty file.
