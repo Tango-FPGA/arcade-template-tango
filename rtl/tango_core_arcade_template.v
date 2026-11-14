@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (c) 2026 the Tango authors
 //==============================================================================
 // tango_core (arcade-template-tango) -- the Arcade Template core: the minimal core for the arcade side of the
@@ -35,10 +35,10 @@
 //        download closes the core adds 1 to it (so a value that went through a save and a restore is visibly
 //        the core's own, not a pass-through of the downloaded bytes); an upload reports the current value.
 //
-// The simulation (sim/tb_arc.inc, mode=arc on sim/tb_menu.cpp) checks the exact rule: seed in -> seed; close ->
-// seed+1; upload reports seed+1; reset -> 0; download the uploaded bytes again -> close -> seed+2.  Its "reboot"
-// pulses RESET (rst_pix: this core and the link), not the framework's download FIFO, which has no reset; a real
-// reboot reconfigures the whole FPGA.
+// The exact rule: seed in -> seed; close -> seed+1; upload reports seed+1; RESET -> 0; download the uploaded bytes
+// again -> close -> seed+2.  RESET (rst_pix: this core and the link) clears the registers; the framework's download
+// FIFO has no reset, and a real reboot reconfigures the whole FPGA, so after a power cycle the value comes back only
+// through the NVRAM download.
 //==============================================================================
 `default_nettype none
 module tango_core (
@@ -50,9 +50,9 @@ module tango_core (
 
     assign CLK_SYS = CLK_PIX;        // as rtl/tango_core_template.v: no clock of its own, no CDC to re-prove here
     wire clk = CLK_PIX;
-    wire reset = RESET;              // RESET = tango_sys's rst_pix (sys/tango_sys.v: ".RESET(rst_pix)"); the sim's
-                                      // "reboot" pulses this directly -- deliberately NOT status[0], which is the
-                                      // OSD's own soft-reset trigger and no part of this core's own proof.
+    wire reset = RESET;              // RESET = tango_sys's rst_pix (sys/tango_sys.v: ".RESET(rst_pix)"), the
+                                      // reset that clears the registers below -- not status[0], which is the
+                                      // OSD's own soft-reset trigger.
 
     // ---- CONF_STR.  The scaler build adds the framework's Video entries (`TANGO_VIDEO_CONF, sys/tango_video_opts.vh:
     // Aspect ratio, Scale, Scanlines and, with TANGO_VIDEO_ROTATE, Rotation); the core never names those entries or

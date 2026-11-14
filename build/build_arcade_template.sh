@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (c) 2026 the Tango authors
 # build_arcade_template.sh -- the bare build of the Arcade Template core (no picture: the download / upload logic
 # only), STA-gated and archived; structured as console-template-tango's build/build_template.sh.
@@ -17,18 +17,15 @@
 #   {fs,bin,txt}; the .txt records this repo's and the framework's commits and the gate result. A failing
 #   gate is archived as ..._STA-FAIL and printed as do-not-flash. Never flashes anything.
 # On the card the .bin goes to /_Console/ArcadeTemplate_<YYYYMMDD>.bin.
-# Heavy jobs: when build/heavy_lock.sh exists (a local, optional queue that lets one heavy job at a time run on a
-# shared machine) the build_core.sh call below goes through it; without it the
-# build just runs.
+# A heavy job (several GB of memory, run through sys/build_tools/tango_capped.sh): one at a time.
 set -eu
 cd "$(dirname "$0")/.."
 ROOT="$(pwd)"
-HL=(); [ -x "$ROOT/build/heavy_lock.sh" ] && HL=("$ROOT/build/heavy_lock.sh")   # optional heavy-job queue (header)
 NAME=tango_arcade_template138
 FILES="$ROOT/rtl/tango_core_arcade_template.v"
 START=$(mktemp); trap 'rm -f "$START"' EXIT
 set +e
-"${HL[@]}" bash -c "TANGO_NO_ARCHIVE=1 TANGO_IOCTL_UPLOAD=1 TANGO_OUT=build/out '$ROOT/sys/board/console138k/build_core.sh' '$NAME' - $FILES"
+bash -c "TANGO_NO_ARCHIVE=1 TANGO_IOCTL_UPLOAD=1 TANGO_OUT=build/out '$ROOT/sys/board/console138k/build_core.sh' '$NAME' - $FILES"
 BC=$?
 set -e
 IMPL="$ROOT/build/out/$NAME/impl/pnr"

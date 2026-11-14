@@ -1,6 +1,6 @@
 # arcade-template-tango -- the Tango Arcade Template core
 
-**Version 2026-10-28** (date code `20261028`)
+**Version 2026-11-14** (date code `20261114`)
 
 arcade-template-tango is the **Arcade Template core** of the Tango FPGA system for the **Sipeed Tang Console 138K**:
 the starting point for writing an arcade core, as [console-template-tango](https://github.com/Tango-FPGA/console-template-tango)
@@ -20,7 +20,6 @@ draws its menu is [firmware-tango](https://github.com/Tango-FPGA/firmware-tango)
 - [What the core does](#what-the-core-does)
 - [Trying it on the board](#trying-it-on-the-board)
 - [Building from source](#building-from-source)
-- [Simulation](#simulation)
 - [Making an arcade core from it](#making-an-arcade-core-from-it)
 - [Layout](#layout)
 - [Licence](#licence)
@@ -67,15 +66,17 @@ is held. Both pad rows read 0 (all red) while the menu is open.
 
 You need a Tang Console 138K with [firmware-tango](https://github.com/Tango-FPGA/firmware-tango) in its BL616 and
 [menu-tango](https://github.com/Tango-FPGA/menu-tango)'s launcher on a FAT32 SD card (firmware-tango's README, "The SD
-card").
+card"). The core is in this repository's **`releases/`** folder, one file per release named
+`Arcade-arcadetemplate_<YYYYMMDD>.bin` (this version: `releases/Arcade-arcadetemplate_20261114.bin`). Take the
+latest (the newest date).
 
 | On the card | What |
 |---|---|
 | `/_Arcade/Arcade Template Test.mra` | `fixtures/Arcade Template Test.mra` from this repository: the name, the core (`<rbf>arcadetemplate</rbf>`), the ROM, the DIP switches, the NVRAM |
-| `/_Arcade/cores/Arcade-arcadetemplate_20261028.bin` | the release's **`Arcade-arcadetemplate_20261028.bin`**, the card build (`build/build_arcade_template_ascal.sh`); the firmware resolves `<rbf>arcadetemplate</rbf>` to `Arcade-arcadetemplate_<date>.bin` (or `arcadetemplate_<date>.bin`), the greatest name winning |
+| `/_Arcade/cores/Arcade-arcadetemplate_<YYYYMMDD>.bin` | the newest **`releases/Arcade-arcadetemplate_<YYYYMMDD>.bin`** from this repository, the card build (`build/build_arcade_template_ascal.sh`); the firmware resolves `<rbf>arcadetemplate</rbf>` to `Arcade-arcadetemplate_<date>.bin` (or `arcadetemplate_<date>.bin`), the greatest name winning |
 | `/config/nvram/Arcade Template Test.nvm` | written by System, Save settings (8 bytes) |
 
-Its menu string ends `V,v261024`, the build date it was built with. What to expect:
+Its menu string ends `V,v<YYMMDD>`, the build date it was built with (System, About; this version: `V,v261114`). What to expect:
 
 1. **Launch** "Arcade Template Test" from the launcher's Arcade list: the test picture, the frame counter running,
    ROM lo = `TANGO-A5` (54 41 4E 47 4F 2D 41 35) and ROM hi = `-ROM-OK!` (2D 52 4F 4D 2D 4F 4B 21).
@@ -98,7 +99,7 @@ You need, on Linux (x86-64):
   `PLL_INIT` and the DDR3 IP from that installation (sys-tango README, "Building").
 - **Python 3** (the build tools).
 - **systemd** user scopes for `tango_capped.sh`, which runs the build in a memory-capped cgroup. A 138K build needs a
-  few GB of memory; run one build or simulation at a time.
+  few GB of memory; run one build at a time.
 
 Get the sources with the framework:
 
@@ -118,20 +119,8 @@ the result in `$TANGO_ARCHIVE` (default `bitstreams/` in the checkout) as `<name
 (`..._STA-FAIL` when the gate failed; the `.txt` holds the gate's report and the resource use).
 
 `TANGO_BUILD_DATE=<YYMMDD>` sets the build date in the menu string (the default is today); the release's `.bin` was
-built with `TANGO_BUILD_DATE=261024`. The card build's timing depends on placement, which changes with the build
+built with `TANGO_BUILD_DATE=261114`. The card build's timing depends on placement, which changes with the build
 date: if its STA gate fails, build again with another `TANGO_BUILD_DATE`.
-
-## Simulation
-
-You need **Verilator 5** (5.020 tested), a C++ compiler, **Python 3**, and `tango_capped.sh`'s systemd user scopes
-(`sys/build_tools/tango_capped.sh`; memory cap `TANGO_MEM_CAP`, default 4G). Each bench prints a PASS / FAIL line:
-
-| Bench | What it checks |
-|---|---|
-| `sim/run_tb_arc.sh` | **the core-glue gate**: the framework (`tango_sys`, `sim/tb_arc.files`) around the core, on asynchronous clocks, with a model of the BL616 on the SPI link (`sim/tb_menu.cpp`, session `sim/tb_arc.inc`): the DIP download reaches the core; an NVRAM download and its close (+1); the upload returns that value; a simulated reboot clears both; downloading the uploaded bytes again restores them (+1 again); the menu string read back equals the RTL's |
-| `sim/run_tb_video_pattern.sh` | the test picture, pixel-exact: the DIP, NVRAM and ROM rows and the frame counter show the downloaded and counting values; the corner marker and the arrow land where each rotation puts them |
-| `sim/run_tb_rotate_with_pattern.sh` | the framework's rotation RTL (`sys/tango_video_rotate_ddr3.v`) fed by this core's picture: every write of every rotation checked, the colour order included |
-| `sim/run_tb_pad_row.sh` | every joystick bit lights exactly its own pad cell on both pads; a copy of the RTL with Up and Down swapped must fail the same bench |
 
 ## Making an arcade core from it
 
@@ -144,7 +133,6 @@ You need **Verilator 5** (5.020 tested), a C++ compiler, **Python 3**, and `tang
 4. **The build:** copy `build/build_arcade_template_ascal.sh`, set `NAME` and your files, and add a core `.sdc` if
    your core has a clock of its own (sys-tango README, "Timing constraints"). A portrait game keeps
    `TANGO_VIDEO_ROTATE=1`.
-5. **The simulation:** adapt `sim/tb_arc.inc` to your indices and registers, and the picture benches to your video.
 
 ## Layout
 
@@ -153,23 +141,23 @@ You need **Verilator 5** (5.020 tested), a C++ compiler, **Python 3**, and `tang
 | `rtl/tango_core_arcade_template.v` | the core (module `tango_core`) |
 | `fixtures/Arcade Template Test.mra` | the `.mra` that launches it (no game ROM data: 16 inline bytes) |
 | `build/` | the Gowin builds (above) |
-| `sim/` | the benches (above): `tb_menu.{v,cpp}` the async-clock bench (adapted from menu-tango's), `tb_arc.inc` its session, `tb_ul.inc` menu-tango's upload session (unused here), `tb_video_pattern.v`, `tb_rotate_with_pattern.v`, `tb_pad_row.v` the unit benches, `streams/empty.bin` an empty page stream |
+| `releases/` | the core bitstreams, `Arcade-arcadetemplate_<YYYYMMDD>.bin`, one per release (copy the latest to the card's `/_Arcade/cores/`) |
 | `sys/` | the framework, [sys-tango](https://github.com/Tango-FPGA/sys-tango) (git submodule) |
 
 ## Licence
 
-**MIT** (`LICENSE`), `Copyright (c) 2026 the Tango authors`, as each source file's `SPDX-License-Identifier: MIT`
-header says. A few strings in these files are MiSTer's -- the menu entries `T[0],Reset;` and `R[0],Reset and close
-OSD;` (as in Template_MiSTer's `Template.sv`), quotes in comments of Arcade-Galaga_MiSTer's button lines and of a
-Galaxian `.mra`'s `<buttons>` line, and the framework's Video entry text that the bench expects -- all listed in
-`NOTICE`, "MiSTer text in files that are otherwise MIT". The menu string format (CONF_STR), the `.mra` format and the
+**GPL-2.0-or-later** (`LICENSE`, the GNU General Public License version 2 text), `Copyright (c) 2026 the Tango
+authors`: every Tango-written file says so in its `SPDX-License-Identifier: GPL-2.0-or-later` header. The core
+contains a few MiSTer strings under that licence -- the menu entries `T[0],Reset;` and `R[0],Reset and close OSD;`
+(as in Template_MiSTer's `Template.sv`), and quotes in comments of Arcade-Galaga_MiSTer's button lines and of a
+Galaxian `.mra`'s `<buttons>` line; `NOTICE` lists each. The menu string format (CONF_STR), the `.mra` format and the
 core interface are MiSTer's; the link to the BL616 follows [FPGA Companion](https://github.com/MiSTle-Dev/FPGA-Companion).
+Release 20261028 of this repository was published under the MIT licence and keeps it.
 
 The framework in `sys/` is sys-tango's, under its own `LICENSE` and `NOTICE`.
 
-**The bitstream (`Arcade-arcadetemplate_20261028.bin`):** the card build includes sys-tango's `tango_video_geo.v`,
-`tango_shmask.v` and `tango_audio_filter.v`, which are under the GNU General Public License, version 2 or (at your
-option) any later version (derived from MiSTer; sys-tango's `NOTICE`). That bitstream is therefore a combined work
-distributed under the terms of GPL-2.0-or-later; its source is this repository with sys-tango at `sys/` (the commit
-the submodule points at). The core's own code stays under MIT. `PLL_INIT` and the DDR3 Memory Interface IP, which the
-build takes from the Gowin installation, keep Gowin's terms.
+**The bitstream (`releases/Arcade-arcadetemplate_<YYYYMMDD>.bin`)** is a combined work distributed under the terms of
+GPL-2.0-or-later: it contains the Arcade Template core, and the card build also includes sys-tango's
+`tango_video_geo.v`, `tango_shmask.v` and `tango_audio_filter.v`, GPL-2.0-or-later (derived from MiSTer; sys-tango's
+`NOTICE`). Its source is this repository with sys-tango at `sys/` (the commit the submodule points at). `PLL_INIT`
+and the DDR3 Memory Interface IP, which the build takes from the Gowin installation, keep Gowin's terms.

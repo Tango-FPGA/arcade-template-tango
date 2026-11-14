@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (c) 2026 the Tango authors
 # build_arcade_template_ascal.sh -- the card build of the Arcade Template core: the same RTL as
 # build/build_arcade_template.sh (the picture is all `ifdef TANGO_VIDEO_ASCAL), with a real picture through the
@@ -18,19 +18,16 @@
 # (TANGO_VIDEO_DDR3, no tango_sdram).
 # Archive: $TANGO_ARCHIVE (default <repo>/bitstreams/)/tango_arcade_template_ascal138_<YYYYMMDD-HHMM>_g<git>[-dirty]_ascal_rot.{fs,bin,txt}
 #   (the _ascal_rot suffix tells it apart from the bare build's archive).
-# Heavy jobs: when build/heavy_lock.sh exists (a local, optional queue that lets one heavy job at a time run on a
-# shared machine) the build_core.sh call below goes through it; without it the
-# build just runs.
+# A heavy job (several GB of memory, run through sys/build_tools/tango_capped.sh): one at a time.
 set -eu
 cd "$(dirname "$0")/.."
 ROOT="$(pwd)"
-HL=(); [ -x "$ROOT/build/heavy_lock.sh" ] && HL=("$ROOT/build/heavy_lock.sh")   # optional heavy-job queue (header)
 NAME=tango_arcade_template_ascal138
 FILES="$ROOT/rtl/tango_core_arcade_template.v"
 OPTS="TANGO_VIDEO_ASCAL=1 TANGO_VIDEO_DDR3=1 TANGO_VIDEO_OPTS=1 TANGO_VIDEO_PROC=1 TANGO_VIDEO_ASCAL_MAXW=288 TANGO_IOCTL_UPLOAD=1 TANGO_VIDEO_ROTATE=1"
 START=$(mktemp); trap 'rm -f "$START"' EXIT
 set +e
-"${HL[@]}" bash -c "env $OPTS TANGO_NO_ARCHIVE=1 TANGO_OUT=build/out '$ROOT/sys/board/console138k/build_core.sh' '$NAME' - $FILES"
+bash -c "env $OPTS TANGO_NO_ARCHIVE=1 TANGO_OUT=build/out '$ROOT/sys/board/console138k/build_core.sh' '$NAME' - $FILES"
 BC=$?
 set -e
 IMPL="$ROOT/build/out/$NAME/impl/pnr"
